@@ -913,16 +913,12 @@ static int compare_advances(const void *ap, const void *bp)
      * even handler as appropriate
      */
         
+    
+    if (screensaver) start_screensaver();
+
     [pool drain];
     
-    if (screensaver)
-    {
-        start_screensaver();
-    }
-    else
-    {
-        play_game();
-    }
+    play_game();
 }
 
 + (void)endGame
@@ -1125,11 +1121,6 @@ static NSMenuItem *superitem(NSMenuItem *self)
 - (void)displayIfNeeded
 {
     [(id)[self activeView] angbandImageRefreshed];
-}
-
-+ (void)connectionDidDie:(NSNotification *)note {
-    NSLog(@"%@", note);
-    exit(-1);
 }
 
 @end
@@ -2867,6 +2858,8 @@ static void start_screensaver(void)
 	/* Set 'savefile' to a valid name */
 	process_player_name(TRUE);
     
+    printf("Svaefile: %s\n", savefile);
+    
 	/* Does the savefile already exist? */
 	file_exist = file_exists(savefile);
     
@@ -2921,14 +2914,7 @@ static void start_screensaver(void)
 	 */
 	screensaver_inkey_hack_buffer[j++] = KTRL('Z'); /* Enter borgmode */
 	screensaver_inkey_hack_buffer[j++] = 'z'; /* Run Borg */
-#endif /* ALLOW_BORG */
-    
-	/* Play game */
-	play_game();
-}
-
-static void remoteConnectionDied(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-    exit(-1);
+#endif /* ALLOW_BORG */    
 }
 
 int main(int argc, char* argv[])
@@ -2939,8 +2925,9 @@ int main(int argc, char* argv[])
     for (i=1; i < argc; i++) {
         if (! strcmp(argv[i], "-remote")) {
             running_as_remote = YES;
-            connectionName = argv[i+1];
-            break;
+            connectionName = argv[++i];
+        } else if (! strcmp(argv[i], "-borg")) {
+            screensaver = YES;
         }
     }
     
@@ -2960,14 +2947,6 @@ int main(int argc, char* argv[])
                 NSLog(@"Failed to contact parent on %s", connectionName);
                 exit(-1);
             }
-            
-            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSConnectionDidDieNotification object:remote_connection];
-            
-            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSPortDidBecomeInvalidNotification object:[remote_connection receivePort]];
-            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSPortDidBecomeInvalidNotification object:[remote_connection sendPort]];
-            
-            CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), "AngbandObserver", remoteConnectionDied, (CFStringRef)NSConnectionDidDieNotification, remote_connection, CFNotificationSuspensionBehaviorDeliverImmediately);
-            
             /* Get notified when the parent dies */
             pid_t parent = getppid();
             dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, parent, DISPATCH_PROC_EXIT, dispatch_get_global_queue(0, 0));
