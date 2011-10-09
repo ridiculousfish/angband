@@ -102,6 +102,8 @@
         close(shmemFD);
         closedFD = YES;
     }
+    [[connection sendPort] invalidate];
+    [[connection receivePort] invalidate];
     [connection invalidate];
     [connection release];
     connection = nil;
@@ -233,34 +235,42 @@
         return;
     }
     
-    /* Map 16 MB, inheritable */
-    fprintf(stderr, "mmap size %ld fd %d\n", sharedBufferSize, shmemFD);
+    /* Map our buffer */
     sharedBuffer = mmap(0, sharedBufferSize, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, shmemFD, 0);
     if (sharedBuffer == MAP_FAILED) {
-        int err = errno;
         perror("server mmap() failed");
-        fprintf(stderr, "Wat %d %s\n", err, strerror(err));
         return;
     }
     
     [self updateBitmapContext];
     
-    pid_t child = vfork();
-    if (child < 0) {
-        perror("vfork() failed");
-        return;
+    pid_t child;
+    switch ((child = vfork())) {
+        case -1:
+            perror("vfork() failed");
+            return;
+        
+        case 0:;
+            /* Child process */
+            const char * const argv[] = {executablePath, "-remote", connectionName, NULL};
+            char ***_NSGetEnviron(void);
+            execve(executablePath, (char * const*)argv, *_NSGetEnviron());
+            perror("execve() failed");
+            return;
+
+        default:
+            /* Parent process. Get notified when the child dies so we can reap it. */
+            childPID = child;
+            dispatch_source_t waiter = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, childPID, DISPATCH_PROC_EXIT, dispatch_get_global_queue(0, 0));
+            dispatch_source_set_event_handler(waiter, ^{
+                waitpid(child, NULL, 0);
+                dispatch_source_cancel(waiter);
+                dispatch_release(waiter);
+            });
+            dispatch_resume(waiter);
+            break;
+
     }
-    
-    if (! child) {
-        /* Child process */
-        const char * const argv[] = {executablePath, "-remote", connectionName, NULL};
-        char ***_NSGetEnviron(void);
-        execve(executablePath, (char * const*)argv, *_NSGetEnviron());
-        perror("execve() failed");
-        return;
-    }
-    
-    childPID = child;
     
     /* Done with this (but keep its value around so child can know it) */
     close(shmemFD);

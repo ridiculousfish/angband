@@ -17,6 +17,16 @@
 		D0C51060143F9179000A80E6 /* AngbandConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C5105E143F9179000A80E6 /* AngbandConnection.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D0C5106C14417B55000A80E6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0C5102C143F7120000A80E6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0C5106714417B2F000A80E6;
+			remoteInfo = Angband;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		D0C51037143F7120000A80E6 /* AngbandScreenSaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AngbandScreenSaver.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C5103A143F7120000A80E6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -129,6 +139,23 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
+/* Begin PBXLegacyTarget section */
+		D0C5106714417B2F000A80E6 /* Angband */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "-f Makefile.cocoa";
+			buildConfigurationList = D0C5106A14417B2F000A80E6 /* Build configuration list for PBXLegacyTarget "Angband" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../src/;
+			dependencies = (
+			);
+			name = Angband;
+			passBuildSettingsInEnvironment = 0;
+			productName = Angband;
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		D0C51036143F7120000A80E6 /* AngbandScreenSaver */ = {
 			isa = PBXNativeTarget;
@@ -143,6 +170,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D0C5106D14417B55000A80E6 /* PBXTargetDependency */,
 			);
 			name = AngbandScreenSaver;
 			productName = AngbandScreenSaver;
@@ -167,6 +195,7 @@
 			projectRoot = "";
 			targets = (
 				D0C51036143F7120000A80E6 /* AngbandScreenSaver */,
+				D0C5106714417B2F000A80E6 /* Angband */,
 			);
 		};
 /* End PBXProject section */
@@ -204,6 +233,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D0C5106D14417B55000A80E6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0C5106714417B2F000A80E6 /* Angband */;
+			targetProxy = D0C5106C14417B55000A80E6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		D0C51045143F7120000A80E6 /* InfoPlist.strings */ = {
@@ -283,6 +320,35 @@
 			};
 			name = Release;
 		};
+		D0C5106814417B2F000A80E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D0C5106914417B2F000A80E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -300,6 +366,15 @@
 			buildConfigurations = (
 				D0C51050143F7120000A80E6 /* Debug */,
 				D0C51051143F7120000A80E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0C5106A14417B2F000A80E6 /* Build configuration list for PBXLegacyTarget "Angband" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0C5106814417B2F000A80E6 /* Debug */,
+				D0C5106914417B2F000A80E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};

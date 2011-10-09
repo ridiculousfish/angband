@@ -1127,6 +1127,11 @@ static NSMenuItem *superitem(NSMenuItem *self)
     [(id)[self activeView] angbandImageRefreshed];
 }
 
++ (void)connectionDidDie:(NSNotification *)note {
+    NSLog(@"%@", note);
+    exit(-1);
+}
+
 @end
 
 
@@ -2547,8 +2552,14 @@ static void hook_plog(const char * str)
 {
     if (str)
     {
+        id pool = [[NSAutoreleasePool alloc] init];
         NSString *string = [NSString stringWithCString:str encoding:NSMacOSRomanStringEncoding];
-        NSRunAlertPanel(@"Danger Will Robinson", @"%@", @"OK", nil, nil, string);
+        if (running_as_remote) {
+            NSLog(@"%@", string);
+        } else {
+            NSRunAlertPanel(@"Danger Will Robinson", @"%@", @"OK", nil, nil, string);
+        }
+        [pool drain];
     }
 }
 
@@ -2624,6 +2635,15 @@ static void initialize_file_paths(void)
         [[NSApplication sharedApplication] presentError:error];
         exit(0);
     }
+    
+    // Copy stuff from libpath/user into the new user directory, in particular borg.txt
+    NSString *libUser = [libString stringByAppendingPathComponent:@"/user/"];
+    for (NSString *filename in [fm contentsOfDirectoryAtPath:libUser error:NULL]) {
+        NSString *src = [libUser stringByAppendingPathComponent:filename];
+        NSString *dst = [user stringByAppendingPathComponent:filename];
+        [fm copyItemAtPath:src toPath:dst error:NULL];
+    }
+    
     
     
     //void init_file_paths(const char *configpath, const char *libpath, const char *datapath)
@@ -2842,6 +2862,8 @@ static void start_screensaver(void)
 	/* Set the name for process_player_name() */
 	//my_strcpy(op_ptr->full_name, saverfilename, sizeof(op_ptr->full_name));
     
+    strcpy(op_ptr->full_name, "SomeName");
+    
 	/* Set 'savefile' to a valid name */
 	process_player_name(TRUE);
     
@@ -2905,6 +2927,10 @@ static void start_screensaver(void)
 	play_game();
 }
 
+static void remoteConnectionDied(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+    exit(-1);
+}
+
 int main(int argc, char* argv[])
 {    
     const char *connectionName = NULL;
@@ -2923,43 +2949,70 @@ int main(int argc, char* argv[])
         /* We're the screensaver! */
         screensaver = YES;
         
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        
-        /* Create the connection */
-        remote_connection = [[NSConnection connectionWithRegisteredName:[NSString stringWithUTF8String:connectionName] host:nil] retain];
-        
-        if (! remote_connection) {
-            NSLog(@"Failed to contact parent on %s", connectionName);
-            exit(-1);
+        @try
+        {
+            NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+            
+            /* Create the connection */
+            remote_connection = [[NSConnection connectionWithRegisteredName:[NSString stringWithUTF8String:connectionName] host:nil] retain];
+            
+            if (! remote_connection) {
+                NSLog(@"Failed to contact parent on %s", connectionName);
+                exit(-1);
+            }
+            
+            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSConnectionDidDieNotification object:remote_connection];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSPortDidBecomeInvalidNotification object:[remote_connection receivePort]];
+            [[NSNotificationCenter defaultCenter] addObserver:[AngbandContext class] selector:@selector(connectionDidDie:) name:NSPortDidBecomeInvalidNotification object:[remote_connection sendPort]];
+            
+            CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), "AngbandObserver", remoteConnectionDied, (CFStringRef)NSConnectionDidDieNotification, remote_connection, CFNotificationSuspensionBehaviorDeliverImmediately);
+            
+            /* Get notified when the parent dies */
+            pid_t parent = getppid();
+            dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, parent, DISPATCH_PROC_EXIT, dispatch_get_global_queue(0, 0));
+            dispatch_source_set_event_handler_f(source, parent_died);
+            dispatch_resume(source);
+            
+            /* Get some information from the parent */
+            id remoteProxy = (id)[remote_connection rootProxy];
+            [remoteProxy setProtocolForProxy:@protocol(AngbandRemoteView)];
+            remote_shmem_size = [remoteProxy angbandSharedBufferSize];
+            int angbandShmemFile = [remoteProxy angbandShmemFile];
+            
+            /* Map stuff */
+            remote_shmem_buffer = mmap(0, remote_shmem_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FILE, angbandShmemFile, 0);
+            if (remote_shmem_buffer == MAP_FAILED) {
+                perror("client mmap() failed");
+                exit(-1);
+            }
+            
+            /* Don't need this any more */
+            close(angbandShmemFile);
+            
+            [pool drain];
+            
+            [AngbandContext beginGame];
+        } 
+        @catch (NSException *exception)
+        {
+            
+            // Maybe the client died
+            NSString *name = [exception name];
+            if ([name isEqual:NSInvalidSendPortException] ||
+                [name isEqual:NSInvalidReceivePortException] ||
+                [name isEqual:NSPortSendException] ||
+                [name isEqual:NSPortReceiveException]) {
+                
+                // The client died, so just exit
+                exit(0);
+            }
+            else
+            {
+                // Other exception
+                [exception raise];
+            }
         }
-        
-        
-        /* Get notified when the parent dies */
-        pid_t parent = getppid();
-        dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC, parent, DISPATCH_PROC_EXIT, dispatch_get_global_queue(0, 0));
-        dispatch_source_set_event_handler_f(source, parent_died);
-        dispatch_resume(source);
-        
-        /* Get some information from the parent */
-        id remoteProxy = (id)[remote_connection rootProxy];
-        [remoteProxy setProtocolForProxy:@protocol(AngbandRemoteView)];
-        remote_shmem_size = [remoteProxy angbandSharedBufferSize];
-        int angbandShmemFile = [remoteProxy angbandShmemFile];
-        fprintf(stderr, "Got fd %d\n", angbandShmemFile);
-        
-        /* Map stuff */
-        remote_shmem_buffer = mmap(0, remote_shmem_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FILE, angbandShmemFile, 0);
-        if (remote_shmem_buffer == MAP_FAILED) {
-            perror("client mmap() failed");
-            exit(-1);
-        }
-        
-        /* Don't need this any more */
-        close(angbandShmemFile);
-        
-        [pool drain];
-        
-        [AngbandContext beginGame];
         /* Once this returns we're done */
     }
     else

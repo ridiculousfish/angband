@@ -126,6 +126,7 @@ LIBFILES = \
   ../lib/help/*.txt \
   ../lib/help/*.hlp \
   ../lib/pref/*.prf \
+  ../lib/user/*.txt
 
 install: $(EXE) $(ICONFILES) $(PLIST) $(LIBFILES)
 	@echo making directories...
@@ -139,6 +140,7 @@ install: $(EXE) $(ICONFILES) $(PLIST) $(LIBFILES)
 	@mkdir -p $(APPRES)/lib/help
 	@mkdir -p $(APPRES)/lib/pref
 	@mkdir -p $(APPRES)/lib/script
+	@mkdir -p $(APPRES)/lib/user
 	@mkdir -p $(APPRES)/lib/xtra/graf
 	@mkdir -p $(APPRES)/lib/xtra/sound
 
@@ -148,6 +150,7 @@ install: $(EXE) $(ICONFILES) $(PLIST) $(LIBFILES)
 	@cp ../lib/help/*.txt $(APPRES)/lib/help
 	@cp ../lib/help/*.hlp $(APPRES)/lib/help
 	@cp ../lib/pref/*.prf $(APPRES)/lib/pref
+	@cp ../lib/user/*.txt $(APPRES)/lib/user
 
 	# 'optionally' install sound and graphics tiles, if present
 	-cp $(TILES) $(APPRES)/
