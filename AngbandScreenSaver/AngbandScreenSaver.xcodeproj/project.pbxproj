@@ -1,0 +1,309 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D0C5103B143F7120000A80E6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C5103A143F7120000A80E6 /* Cocoa.framework */; };
+		D0C5103D143F7120000A80E6 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C5103C143F7120000A80E6 /* ScreenSaver.framework */; };
+		D0C51047143F7120000A80E6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D0C51045143F7120000A80E6 /* InfoPlist.strings */; };
+		D0C5104A143F7120000A80E6 /* AngbandScreenSaverView.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C51049143F7120000A80E6 /* AngbandScreenSaverView.h */; };
+		D0C5104C143F7120000A80E6 /* AngbandScreenSaverView.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C5104B143F7120000A80E6 /* AngbandScreenSaverView.m */; };
+		D0C51053143F8154000A80E6 /* Angband.app in Resources */ = {isa = PBXBuildFile; fileRef = D0C51052143F8154000A80E6 /* Angband.app */; };
+		D0C5105F143F9179000A80E6 /* AngbandConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = D0C5105D143F9179000A80E6 /* AngbandConnection.h */; };
+		D0C51060143F9179000A80E6 /* AngbandConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = D0C5105E143F9179000A80E6 /* AngbandConnection.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D0C51037143F7120000A80E6 /* AngbandScreenSaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AngbandScreenSaver.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0C5103A143F7120000A80E6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D0C5103C143F7120000A80E6 /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
+		D0C5103F143F7120000A80E6 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		D0C51040143F7120000A80E6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		D0C51041143F7120000A80E6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D0C51044143F7120000A80E6 /* AngbandScreenSaver-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AngbandScreenSaver-Info.plist"; sourceTree = "<group>"; };
+		D0C51046143F7120000A80E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D0C51048143F7120000A80E6 /* AngbandScreenSaver-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AngbandScreenSaver-Prefix.pch"; sourceTree = "<group>"; };
+		D0C51049143F7120000A80E6 /* AngbandScreenSaverView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AngbandScreenSaverView.h; sourceTree = "<group>"; };
+		D0C5104B143F7120000A80E6 /* AngbandScreenSaverView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AngbandScreenSaverView.m; sourceTree = "<group>"; };
+		D0C51052143F8154000A80E6 /* Angband.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = Angband.app; path = ../Angband.app; sourceTree = "<group>"; };
+		D0C5105D143F9179000A80E6 /* AngbandConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AngbandConnection.h; sourceTree = "<group>"; };
+		D0C5105E143F9179000A80E6 /* AngbandConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AngbandConnection.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D0C51032143F7120000A80E6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0C5103B143F7120000A80E6 /* Cocoa.framework in Frameworks */,
+				D0C5103D143F7120000A80E6 /* ScreenSaver.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D0C5102A143F7120000A80E6 = {
+			isa = PBXGroup;
+			children = (
+				D0C51042143F7120000A80E6 /* AngbandScreenSaver */,
+				D0C51039143F7120000A80E6 /* Frameworks */,
+				D0C51038143F7120000A80E6 /* Products */,
+				D0C51054143F8162000A80E6 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		D0C51038143F7120000A80E6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D0C51037143F7120000A80E6 /* AngbandScreenSaver.saver */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D0C51039143F7120000A80E6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D0C5103A143F7120000A80E6 /* Cocoa.framework */,
+				D0C5103C143F7120000A80E6 /* ScreenSaver.framework */,
+				D0C5103E143F7120000A80E6 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D0C5103E143F7120000A80E6 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D0C5103F143F7120000A80E6 /* AppKit.framework */,
+				D0C51040143F7120000A80E6 /* CoreData.framework */,
+				D0C51041143F7120000A80E6 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		D0C51042143F7120000A80E6 /* AngbandScreenSaver */ = {
+			isa = PBXGroup;
+			children = (
+				D0C5105D143F9179000A80E6 /* AngbandConnection.h */,
+				D0C5105E143F9179000A80E6 /* AngbandConnection.m */,
+				D0C51049143F7120000A80E6 /* AngbandScreenSaverView.h */,
+				D0C5104B143F7120000A80E6 /* AngbandScreenSaverView.m */,
+				D0C51043143F7120000A80E6 /* Supporting Files */,
+			);
+			path = AngbandScreenSaver;
+			sourceTree = "<group>";
+		};
+		D0C51043143F7120000A80E6 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D0C51044143F7120000A80E6 /* AngbandScreenSaver-Info.plist */,
+				D0C51045143F7120000A80E6 /* InfoPlist.strings */,
+				D0C51048143F7120000A80E6 /* AngbandScreenSaver-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D0C51054143F8162000A80E6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D0C51052143F8154000A80E6 /* Angband.app */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D0C51033143F7120000A80E6 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0C5104A143F7120000A80E6 /* AngbandScreenSaverView.h in Headers */,
+				D0C5105F143F9179000A80E6 /* AngbandConnection.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D0C51036143F7120000A80E6 /* AngbandScreenSaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0C5104F143F7120000A80E6 /* Build configuration list for PBXNativeTarget "AngbandScreenSaver" */;
+			buildPhases = (
+				D0C51031143F7120000A80E6 /* Sources */,
+				D0C51032143F7120000A80E6 /* Frameworks */,
+				D0C51033143F7120000A80E6 /* Headers */,
+				D0C51034143F7120000A80E6 /* Resources */,
+				D0C51035143F7120000A80E6 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AngbandScreenSaver;
+			productName = AngbandScreenSaver;
+			productReference = D0C51037143F7120000A80E6 /* AngbandScreenSaver.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D0C5102C143F7120000A80E6 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = D0C5102F143F7120000A80E6 /* Build configuration list for PBXProject "AngbandScreenSaver" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = D0C5102A143F7120000A80E6;
+			productRefGroup = D0C51038143F7120000A80E6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D0C51036143F7120000A80E6 /* AngbandScreenSaver */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D0C51034143F7120000A80E6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0C51053143F8154000A80E6 /* Angband.app in Resources */,
+				D0C51047143F7120000A80E6 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		D0C51035143F7120000A80E6 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D0C51031143F7120000A80E6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0C5104C143F7120000A80E6 /* AngbandScreenSaverView.m in Sources */,
+				D0C51060143F9179000A80E6 /* AngbandConnection.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		D0C51045143F7120000A80E6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D0C51046143F7120000A80E6 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D0C5104D143F7120000A80E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_GC = supported;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		D0C5104E143F7120000A80E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_GC = supported;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D0C51050143F7120000A80E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AngbandScreenSaver/AngbandScreenSaver-Prefix.pch";
+				INFOPLIST_FILE = "AngbandScreenSaver/AngbandScreenSaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
+		};
+		D0C51051143F7120000A80E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AngbandScreenSaver/AngbandScreenSaver-Prefix.pch";
+				INFOPLIST_FILE = "AngbandScreenSaver/AngbandScreenSaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D0C5102F143F7120000A80E6 /* Build configuration list for PBXProject "AngbandScreenSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0C5104D143F7120000A80E6 /* Debug */,
+				D0C5104E143F7120000A80E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0C5104F143F7120000A80E6 /* Build configuration list for PBXNativeTarget "AngbandScreenSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0C51050143F7120000A80E6 /* Debug */,
+				D0C51051143F7120000A80E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D0C5102C143F7120000A80E6 /* Project object */;
+}
