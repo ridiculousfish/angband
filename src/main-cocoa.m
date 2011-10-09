@@ -12,6 +12,7 @@
 #include "cmds.h"
 #include "files.h"
 #include "init.h"
+#include "externs.h"
 
 #if BORG
 #include "borg1.h"
@@ -47,6 +48,20 @@ static game_command cmd = { CMD_NULL, 0 };
 /* Our command-fetching function */
 static errr cocoa_get_cmd(cmd_context context, bool wait);
 
+/* Our screensaver start function */
+static void start_screensaver(void);
+extern char (*inkey_hack)(int flush_first);
+
+static char screensaver_inkey_hack_buffer[1024];
+static char screensaver_inkey_hack(int flush_first)
+{
+	static int screensaver_inkey_hack_index = 0;
+    
+	if (screensaver_inkey_hack_index < sizeof(screensaver_inkey_hack_buffer))
+		return (screensaver_inkey_hack_buffer[screensaver_inkey_hack_index++]);
+	else
+		return ESCAPE;
+}
 
 /* Application defined event numbers */
 enum
@@ -900,7 +915,14 @@ static int compare_advances(const void *ap, const void *bp)
         
     [pool drain];
     
-    play_game();
+    if (screensaver)
+    {
+        start_screensaver();
+    }
+    else
+    {
+        play_game();
+    }
 }
 
 + (void)endGame
@@ -2311,7 +2333,10 @@ static BOOL contains_angband_view(NSView *view)
 /* Encodes an NSEvent Angband-style, or forwards it along.  Returns YES if the event was sent to Angband, NO if Cocoa (or nothing) handled it */
 static BOOL send_event(NSEvent *event)
 {
-        
+#if 1
+    return NO;
+#else
+    
     /* If the receiving window is not an Angband window, then do nothing */
     if (! contains_angband_view([[event window] contentView]))
     {
@@ -2428,6 +2453,7 @@ static BOOL send_event(NSEvent *event)
             break;
     }
     return YES;
+#endif
 }
 
 /*
@@ -2450,7 +2476,7 @@ static BOOL check_events(int wait)
         if (quit_when_ready)
         {
             /* send escape events until we quit */
-            Term_keypress(0x1B, 0);
+            Term_keypress(0x1B);
             [pool drain];
             return false;
         }
@@ -2805,8 +2831,82 @@ static void parent_died(void *unused)
     exit(0);
 }
 
-int main(int argc, char* argv[])
+static void start_screensaver(void)
 {
+	bool file_exist;
+    
+#ifdef ALLOW_BORG
+	int i, j;
+#endif /* ALLOW_BORG */
+    
+	/* Set the name for process_player_name() */
+	//my_strcpy(op_ptr->full_name, saverfilename, sizeof(op_ptr->full_name));
+    
+	/* Set 'savefile' to a valid name */
+	process_player_name(TRUE);
+    
+	/* Does the savefile already exist? */
+	file_exist = file_exists(savefile);
+    
+	/* Don't try to load a non-existant savefile */
+	if (!file_exist) savefile[0] = '\0';
+    
+	/* Game in progress */
+	game_in_progress = TRUE;
+    
+	Term_fresh();
+        
+#ifdef ALLOW_BORG
+    
+	/*
+	 * MegaHack - Try to start the Borg.
+	 *
+	 * The simulated keypresses will be processed when play_game()
+	 * is called.
+	 */
+    
+	inkey_hack = screensaver_inkey_hack;
+	j = 0;
+    
+	/*
+	 * Either start a new character or load up the old one
+	 */
+	if (!file_exist)
+	{
+		int n = 0;//strlen(saverfilename);
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Return */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+	}
+	else /* Savefile present, get past the start up screens */
+	{
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+	}
+    
+	/*
+	 * Make sure the "verify_special" options is off, so that we can
+	 * get into Borg mode without confirmation.
+	 * 
+	 * Try just marking the savefile correctly.
+	 */
+	p_ptr->noscore |= (NOSCORE_BORG);
+    
+	/*
+	 * Now start the Borg!
+	 */
+	screensaver_inkey_hack_buffer[j++] = KTRL('Z'); /* Enter borgmode */
+	screensaver_inkey_hack_buffer[j++] = 'z'; /* Run Borg */
+#endif /* ALLOW_BORG */
+    
+	/* Play game */
+	play_game();
+}
+
+int main(int argc, char* argv[])
+{    
     const char *connectionName = NULL;
     /* Look for -remote to detect if we are running remotely */
     int i;
@@ -2819,6 +2919,10 @@ int main(int argc, char* argv[])
     }
     
     if (running_as_remote && connectionName) {
+        
+        /* We're the screensaver! */
+        screensaver = YES;
+        
         NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
         
         /* Create the connection */

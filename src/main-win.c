@@ -464,7 +464,7 @@ static HPALETTE hPal;
  */
 static HWND hwndSaver;
 
-static bool screensaver = FALSE;
+/* static bool screensaver = FALSE; */ /* apw moved to externs */
 static bool screensaver_active = FALSE;
 
 static HANDLE screensaverSemaphore;
@@ -3221,31 +3221,22 @@ static void start_screensaver(void)
 	j = 0;
 
 	/*
-	 * If no savefile is present or then go through the steps necessary
-	 * to create a random character.  If a savefile already is present
-	 * then the simulated keypresses will either clean away any [-more-]
-	 * prompts (if the character is alive), or create a new random
-	 * character.
-	 *
-	 * Luckily it's possible to send the same keypresses no matter if
-	 * the character is alive, dead, or not even yet created.
+	 * Either start a new character or load up the old one
 	 */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Gender */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Race */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Class */
-	screensaver_inkey_hack_buffer[j++] = 'n'; /* Modify options */
-	screensaver_inkey_hack_buffer[j++] = '\r'; /* Reroll */
-
-	if (!file_exists)
+	if (!file_exist)
 	{
-		/* Savefile name */
 		int n = strlen(saverfilename);
-		for (i = 0; i < n; i++)
-			screensaver_inkey_hack_buffer[j++] = saverfilename[i];
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Return */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
 	}
-
-	screensaver_inkey_hack_buffer[j++] = '\r'; /* Return */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Character info */
+	else /* Savefile present, get past the start up screens */
+	{
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
+	}
 
 	/*
 	 * Make sure the "verify_special" options is off, so that we can
@@ -3256,23 +3247,8 @@ static void start_screensaver(void)
 	p_ptr->noscore |= (NOSCORE_BORG);
 
 	/*
-	 * Make sure the "OPT(cheat_live)" option is set, so that the Borg can
-	 * automatically restart.
-	 */
-	screensaver_inkey_hack_buffer[j++] = '5'; /* Cheat options */
-
-	/* Cursor down to "cheat live" */
-	for (i = 0; i < OPT_OPT(cheat_live) - OPT_CHEAT; i++)
-		screensaver_inkey_hack_buffer[j++] = '2';
-
-	screensaver_inkey_hack_buffer[j++] = 'y'; /* Switch on "OPT(cheat_live)" */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Leave cheat options */
-	screensaver_inkey_hack_buffer[j++] = ESCAPE; /* Leave options */
-
-	/*
 	 * Now start the Borg!
 	 */
-
 	screensaver_inkey_hack_buffer[j++] = KTRL('Z'); /* Enter borgmode */
 	screensaver_inkey_hack_buffer[j++] = 'z'; /* Run Borg */
 #endif /* ALLOW_BORG */
@@ -3983,7 +3959,8 @@ static void handle_wm_paint(HWND hWnd)
 	term_data *td;
 
 	/* Acquire proper "term_data" info */
-	td = (term_data *)GetWindowLong(hWnd, 0);
+	/* td = (term_data *)GetWindowLong(hWnd, 0); */
+	td = (term_data *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	BeginPaint(hWnd, &ps);
 
@@ -4028,15 +4005,20 @@ static LRESULT FAR PASCAL AngbandWndProc(HWND hWnd, UINT uMsg,
 #endif /* USE_SAVER */
 
 	/* Acquire proper "term_data" info */
-	td = (term_data *)GetWindowLong(hWnd, 0);
-
+	/* td = (term_data *)GetWindowLong(hWnd, 0); */
+	td = (term_data *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 	/* Handle message */
 	switch (uMsg)
 	{
 		/* XXX XXX XXX */
 		case WM_NCCREATE:
 		{
-			SetWindowLong(hWnd, 0, (LONG)(my_td));
+			/* SetWindowLong(hWnd, 0, (LONG)(my_td)); */
+#ifdef _WIN64
+			 SetWindowLongPtr(hWnd, GWLP_USERDATA, my_td);
+#else
+			 SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG)(my_td));
+#endif
 			break;
 		}
 
@@ -4366,7 +4348,8 @@ static LRESULT FAR PASCAL AngbandListProc(HWND hWnd, UINT uMsg,
 
 
 	/* Acquire proper "term_data" info */
-	td = (term_data *)GetWindowLong(hWnd, 0);
+	/* td = (term_data *)GetWindowLong(hWnd, 0); */
+	td = (term_data *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	/* Process message */
 	switch (uMsg)
@@ -4374,7 +4357,12 @@ static LRESULT FAR PASCAL AngbandListProc(HWND hWnd, UINT uMsg,
 		/* XXX XXX XXX */
 		case WM_NCCREATE:
 		{
-			SetWindowLong(hWnd, 0, (LONG)(my_td));
+			/* SetWindowLong(hWnd, 0, (LONG)(my_td)); */
+#ifdef _WIN64
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, my_td);
+#else
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG)(my_td));
+#endif
 			break;
 		}
 
@@ -5191,6 +5179,13 @@ int FAR PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrevInst,
 #ifdef USE_SAVER
 	if (screensaver)
 	{
+		/* Set command hook (apw)*/
+		cmd_get_hook = win_get_cmd;
+
+		/* Set up the display handlers and things. (apw)*/
+		init_display();
+		initialized = TRUE;
+
 		/* Start the screensaver */
 		start_screensaver();
 

@@ -87,20 +87,23 @@ void do_cmd_try_debug(void)
  */
 void do_cmd_try_borg(void)
 {
-	/* Ask first time */
-	if (!(p_ptr->noscore & NOSCORE_BORG))
+	if (!screensaver)
 	{
-		/* Mention effects */
-		msg_print("You are about to use the dangerous, unsupported, borg commands!");
-		msg_print("Your machine may crash, and your savefile may become corrupted!");
-		message_flush();
+		/* Ask first time */
+		if (!(p_ptr->noscore & NOSCORE_BORG))
+		{
+			/* Mention effects */
+			msg_print("You are about to use the dangerous, unsupported, borg commands!");
+			msg_print("Your machine may crash, and your savefile may become corrupted!");
+			message_flush();
 
-		/* Verify request */
-		if (!get_check("Are you sure you want to use the borg commands? "))
-			return;
+			/* Verify request */
+			if (!get_check("Are you sure you want to use the borg commands? "))
+				return;
 
-		/* Mark savefile */
-		p_ptr->noscore |= NOSCORE_BORG;
+			/* Mark savefile */
+			p_ptr->noscore |= NOSCORE_BORG;
+		}
 	}
 
 	/* Okay */
@@ -183,7 +186,9 @@ void do_cmd_itemlist(void)
  */
 void do_cmd_unknown(void)
 {
+#ifndef ALLOW_BORG  /* apw --borg uses ESC and Space which trigger this. */
 	prt("Type '?' for help.", 0, 0);
+#endif
 }
 
 

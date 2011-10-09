@@ -1387,7 +1387,9 @@ static void dungeon(void)
 	/* If autosave is pending, do it now. */
 	if (p_ptr->autosave)
 	{
+#ifndef ALLOW_BORG /* APW, not a good idea with the borg.  He jumps levels too quickly.  Burn up your drive. */
 		save_game();
+#endif
 		p_ptr->autosave = FALSE;
 	}
 
@@ -1479,7 +1481,10 @@ static void dungeon(void)
 	if (p_ptr->energy < INITIAL_DUNGEON_ENERGY)
 		p_ptr->energy = INITIAL_DUNGEON_ENERGY;
 
-
+#ifdef XSCREENSAVER
+	/* apw for OsX.  Start the borg if auto_start_borg is TRUE */
+	if (auto_start_borg) do_cmd_borg();
+#endif
 	/*** Process this dungeon level ***/
 
 	/* Main loop */

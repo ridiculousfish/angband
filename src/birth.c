@@ -494,7 +494,7 @@ void player_init(struct player *p) {
 /**
  * Try to wield everything wieldable in the inventory.
  */
-static void wield_all(struct player *p)
+void wield_all(struct player *p)
 {
 	object_type *o_ptr;
 	object_type *i_ptr;
@@ -1061,6 +1061,88 @@ void player_birth(bool quickstart_allowed)
 		if (!success) msg_print("Sorry, could not deal with suffix");
 	}
 	
+#ifdef ALLOW_BORG
+	/* Generate our first borg */
+	if (screensaver)
+	{
+		player_init(p_ptr);
+		do_birth_reset(quickstart_allowed, &quickstart_prev);
+		rolled_stats = FALSE;
+		
+		/* Male */
+		p_ptr->psex = 1; 
+		player_generate(p_ptr, NULL, NULL, NULL);
+		/* Human */
+		p_ptr->prace = 0;
+		player_generate(p_ptr, NULL, NULL, NULL);
+		reset_stats(stats, points_spent, &points_left);
+		generate_stats(stats, points_spent, &points_left);
+		rolled_stats = FALSE;
+		/* Warrior */
+		p_ptr->pclass = 0;
+		player_generate(p_ptr, NULL, NULL, NULL);
+		reset_stats(stats, points_spent, &points_left);
+		generate_stats(stats, points_spent, &points_left);
+		rolled_stats = FALSE;
+
+		/* Set adult options from birth options */
+		for (i = OPT_BIRTH; i < OPT_CHEAT; i++)
+		{
+			op_ptr->opt[OPT_ADULT + (i - OPT_BIRTH)] =
+				op_ptr->opt[i];
+		}
+
+		/* Reset score options from cheat options */
+		for (i = OPT_CHEAT; i < OPT_ADULT; i++)
+		{
+			op_ptr->opt[OPT_SCORE + (i - OPT_CHEAT)] =
+				op_ptr->opt[i];
+		}
+
+		/* Get a new character */
+		get_stats(stats);
+
+		/* Update stats with bonuses, etc. */
+		get_bonuses();
+
+		/* There's no real need to do this here, but it's tradition. */
+		get_ahw();
+		get_history();
+
+		roll_hp();
+
+		squelch_birth_init();
+
+		/* Clear old messages, add new starting message */
+		history_clear();
+		history_add("Began the quest to destroy Morgoth.", HISTORY_PLAYER_BIRTH, 0);
+
+		/* Reset message prompt (i.e. no extraneous -more-s) */
+		msg_flag = TRUE;
+
+		/* Note player birth in the message recall */
+		message_add(" ", MSG_GENERIC);
+		message_add("  ", MSG_GENERIC);
+		message_add("====================", MSG_GENERIC);
+		message_add("  ", MSG_GENERIC);
+		message_add(" ", MSG_GENERIC);
+
+		/* Give the player some money */
+		get_money();
+
+		/* Outfit the player, if they can sell the stuff */
+		if (!OPT(adult_no_selling)) player_outfit(p_ptr);
+
+		/* Initialise the stores */
+		store_reset();
+
+		/* Now we're really done.. */
+		event_signal(EVENT_LEAVE_BIRTH);
+
+		return;
+	}
+
+#endif /* ALLOW_BORG */
 
 	/* We're ready to start the interactive birth process. */
 	event_signal_flag(EVENT_ENTER_BIRTH, quickstart_allowed);
