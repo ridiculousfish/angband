@@ -1074,7 +1074,8 @@ static NSMenuItem *superitem(NSMenuItem *self)
     }
     else
     {
-        return [[[angbandViews lastObject] window] isVisible];
+        NSWindow *window = [[angbandViews lastObject] window];
+        return [window isVisible] || [window isMiniaturized] || [NSApp isHidden];
     }
 }
 
@@ -1137,7 +1138,7 @@ static NSMenuItem *superitem(NSMenuItem *self)
 }
 
 - (void)angbandImageRefreshed {
-    [self displayIfNeeded];
+    if (frames_per_second > 0) [self displayIfNeeded];
 }
 
 - (NSSize)angbandViewportSize {
@@ -2330,6 +2331,7 @@ static BOOL contains_angband_view(NSView *view)
 static BOOL send_event(NSEvent *event)
 {
 #if 1
+    [NSApp sendEvent:event];
     return NO;
 #else
     
@@ -2639,7 +2641,15 @@ static void initialize_file_paths(void)
     
     //void init_file_paths(const char *configpath, const char *libpath, const char *datapath)
     init_file_paths(libpath, libpath, basepath);
-    
+}
+
+static void tell_borg_to_save(CFRunLoopTimerRef timer, void *info)
+{
+    NSLog(@"Saving to %s", savefile);
+    if (savefile[0]) {
+        do_cmd_save_game(FALSE, 0);
+        [[NSUserDefaults angbandDefaults] setValue:[[NSString stringWithUTF8String:savefile] lastPathComponent] forKey:@"BorgSaveFileName"];
+    }
 }
 
 @interface AngbandAppDelegate : NSObject {
@@ -2842,6 +2852,7 @@ static void parent_died(void *unused)
     exit(0);
 }
 
+extern bool borg_cheat_death;
 static void start_screensaver(void)
 {
 	bool file_exist;
@@ -2851,14 +2862,14 @@ static void start_screensaver(void)
 #endif /* ALLOW_BORG */
     
 	/* Set the name for process_player_name() */
-	//my_strcpy(op_ptr->full_name, saverfilename, sizeof(op_ptr->full_name));
+    NSString *borgName = [[NSUserDefaults angbandDefaults] valueForKey:@"BorgSaveFileName"];
     
-    strcpy(op_ptr->full_name, "SomeName");
-    
+    if (borgName) {
+        my_strcpy(op_ptr->full_name, [borgName UTF8String], sizeof(op_ptr->full_name));
+    }
+        
 	/* Set 'savefile' to a valid name */
 	process_player_name(TRUE);
-    
-    printf("Svaefile: %s\n", savefile);
     
 	/* Does the savefile already exist? */
 	file_exist = file_exists(savefile);
@@ -2866,8 +2877,15 @@ static void start_screensaver(void)
 	/* Don't try to load a non-existant savefile */
 	if (!file_exist) savefile[0] = '\0';
     
+    /* Let us cheat death */
+    borg_cheat_death = TRUE;
+    
 	/* Game in progress */
 	game_in_progress = TRUE;
+    
+    /* Save five seconds from now, and then every five minutes */
+    CFRunLoopTimerRef timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + 5, 5 * 60, 0, 0, tell_borg_to_save, NULL);
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kCFRunLoopDefaultMode);
     
 	Term_fresh();
         
