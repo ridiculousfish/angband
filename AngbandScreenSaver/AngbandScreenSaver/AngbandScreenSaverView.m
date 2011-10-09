@@ -14,6 +14,7 @@
 - (id)initWithFrame:(NSRect)frame isPreview:(BOOL)isPreview
 {
     self = [super initWithFrame:frame isPreview:isPreview];
+    [self setAnimationTimeInterval:-1]; //prevent ScreenSaver from trying to animate us
     return self;
 }
 
