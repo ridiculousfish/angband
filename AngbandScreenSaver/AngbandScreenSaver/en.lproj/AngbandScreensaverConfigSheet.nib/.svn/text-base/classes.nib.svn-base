@@ -1,0 +1,32 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                acceptConfigure = id; 
+                cancelConfigure = id; 
+                modifyAnimationSpeed = id; 
+                resetCharacter = id; 
+            }; 
+            CLASS = AngbandSaverView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                animationSpeedDescription = NSTextField; 
+                animationSpeedSlider = NSSlider; 
+                configureSheet = NSWindow; 
+                fontNamePopUp = NSPopUpButton; 
+                fontSizePopUp = NSPopUpButton; 
+                graphicsPopUp = NSPopUpButton; 
+                pauseForMessagesButton = NSButton; 
+                useSoundButton = NSButton; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {setRefreshRate = id; setUseSoundFromMenuItem = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

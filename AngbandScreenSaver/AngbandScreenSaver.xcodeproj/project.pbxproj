@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D00CE0801444F2DC00090779 /* AngbandScreensaverConfigSheet.nib in Resources */ = {isa = PBXBuildFile; fileRef = D00CE07E1444F2DC00090779 /* AngbandScreensaverConfigSheet.nib */; };
+		D03D020814464E1D00D1896F /* FontMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = D03D020614464E1D00D1896F /* FontMenu.h */; };
+		D03D020914464E1D00D1896F /* FontMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = D03D020714464E1D00D1896F /* FontMenu.m */; };
 		D0C5103B143F7120000A80E6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C5103A143F7120000A80E6 /* Cocoa.framework */; };
 		D0C5103D143F7120000A80E6 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C5103C143F7120000A80E6 /* ScreenSaver.framework */; };
 		D0C51047143F7120000A80E6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D0C51045143F7120000A80E6 /* InfoPlist.strings */; };
@@ -28,6 +31,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D00CE0761444E09900090779 /* main-cocoa.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "main-cocoa.m"; path = "../src/main-cocoa.m"; sourceTree = "<group>"; };
+		D00CE07F1444F2DC00090779 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/AngbandScreensaverConfigSheet.nib; sourceTree = "<group>"; };
+		D03D020614464E1D00D1896F /* FontMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FontMenu.h; sourceTree = "<group>"; };
+		D03D020714464E1D00D1896F /* FontMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FontMenu.m; sourceTree = "<group>"; };
 		D0C51037143F7120000A80E6 /* AngbandScreenSaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AngbandScreenSaver.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C5103A143F7120000A80E6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D0C5103C143F7120000A80E6 /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
@@ -64,6 +71,7 @@
 				D0C51039143F7120000A80E6 /* Frameworks */,
 				D0C51038143F7120000A80E6 /* Products */,
 				D0C51054143F8162000A80E6 /* Resources */,
+				D00CE0761444E09900090779 /* main-cocoa.m */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +106,8 @@
 		D0C51042143F7120000A80E6 /* AngbandScreenSaver */ = {
 			isa = PBXGroup;
 			children = (
+				D03D020614464E1D00D1896F /* FontMenu.h */,
+				D03D020714464E1D00D1896F /* FontMenu.m */,
 				D0C5105D143F9179000A80E6 /* AngbandConnection.h */,
 				D0C5105E143F9179000A80E6 /* AngbandConnection.m */,
 				D0C51049143F7120000A80E6 /* AngbandScreenSaverView.h */,
@@ -113,6 +123,7 @@
 				D0C51044143F7120000A80E6 /* AngbandScreenSaver-Info.plist */,
 				D0C51045143F7120000A80E6 /* InfoPlist.strings */,
 				D0C51048143F7120000A80E6 /* AngbandScreenSaver-Prefix.pch */,
+				D00CE07E1444F2DC00090779 /* AngbandScreensaverConfigSheet.nib */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -134,6 +145,7 @@
 			files = (
 				D0C5104A143F7120000A80E6 /* AngbandScreenSaverView.h in Headers */,
 				D0C5105F143F9179000A80E6 /* AngbandConnection.h in Headers */,
+				D03D020814464E1D00D1896F /* FontMenu.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -207,6 +219,7 @@
 			files = (
 				D0C51053143F8154000A80E6 /* Angband.app in Resources */,
 				D0C51047143F7120000A80E6 /* InfoPlist.strings in Resources */,
+				D00CE0801444F2DC00090779 /* AngbandScreensaverConfigSheet.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +242,7 @@
 			files = (
 				D0C5104C143F7120000A80E6 /* AngbandScreenSaverView.m in Sources */,
 				D0C51060143F9179000A80E6 /* AngbandConnection.m in Sources */,
+				D03D020914464E1D00D1896F /* FontMenu.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +257,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		D00CE07E1444F2DC00090779 /* AngbandScreensaverConfigSheet.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D00CE07F1444F2DC00090779 /* en */,
+			);
+			name = AngbandScreensaverConfigSheet.nib;
+			sourceTree = "<group>";
+		};
 		D0C51045143F7120000A80E6 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -377,6 +399,7 @@
 				D0C5106914417B2F000A80E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

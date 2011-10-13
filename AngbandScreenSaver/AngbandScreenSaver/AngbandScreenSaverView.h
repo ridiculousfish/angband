@@ -13,6 +13,15 @@
 @interface AngbandScreenSaverView : ScreenSaverView {
 @private
     BOOL connected;
+    IBOutlet NSWindow *configureSheet;
+    IBOutlet NSSlider *animationSpeedSlider;
+    IBOutlet NSTextField *animationSpeedDescription;
+    IBOutlet NSPopUpButton *graphicsPopUp;
+    IBOutlet NSPopUpButton *fontNamePopUp;
 }
+
+- (IBAction)modifyAnimationSpeed:sender;
+- (IBAction)cancelConfigure:sender;
+- (IBAction)acceptConfigure:sender;
 
 @end

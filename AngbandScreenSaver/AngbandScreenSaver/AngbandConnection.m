@@ -7,6 +7,7 @@
 //
 
 #import "AngbandConnection.h"
+#import <ScreenSaver/ScreenSaver.h>
 #include <sys/mman.h>
 
 #define kBitmapMaxWidth 1920
@@ -18,9 +19,11 @@
 - (size_t)angbandSharedBufferSize;
 - (int)angbandShmemFile;
 
-- (void)setNeedsDisplayAtNextRefreshInRect:(NSRect)rect;
+- (void)setNeedsDisplayAtNextRefreshInBaseRect:(NSRect)rect withBaseSize:(NSSize)baseSize;
 - (void)setNeedsDisplayAtNextRefresh;
 - (void)angbandImageRefreshed;
+
+- (void)setPreferences:(NSDictionary *)preferences;
 
 @end
 
@@ -30,9 +33,10 @@
 - (void)updateBitmapContext;
 @end
 
-/* A message we can send to the AngbandContext */
-@interface NSObject (AngbandContextStuff)
+/* Messages we can send to the AngbandContext */
+@protocol AngbandContext <NSObject>
 - (void)angbandViewDidScale:(id)view;
+- (oneway void)clientIsShuttingDown;
 @end
 
 @implementation AngbandConnection
@@ -50,9 +54,11 @@
 }
 
 - (void)setAngbandContext:(id)context {
-    [context retain];
-    [angbandContext release];
-    angbandContext = context;
+    if (context != angbandContext) {
+        [angbandContext release];
+        angbandContext = [context retain];
+        [angbandContext setProtocolForProxy:@protocol(AngbandContext)];
+    }
 }
 
 /* The "active" view is the widest one */
@@ -94,6 +100,8 @@
 }
 
 - (void)dispose {
+    [angbandContext clientIsShuttingDown];
+    
     if (sharedBuffer) munmap((void *)sharedBuffer, sharedBufferSize);
     sharedBuffer = NULL;
     CGContextRelease(bitmapContext);
@@ -107,6 +115,10 @@
     [connection invalidate];
     [connection release];
     connection = nil;
+    
+    [angbandContext release];
+    angbandContext = nil;
+    
     rectIndex = 0;
     /* Could clean up childPID here */
     childPID = 0;
@@ -142,11 +154,26 @@
     rectsToDisplay[rectIndex++] = rect;
 }
 
-- (void)setNeedsDisplayAtNextRefresh {
+- (oneway void)setNeedsDisplayAtNextRefreshInBaseRect:(NSRect)rect withBaseSize:(NSSize)baseSize {
+    /* Transform rect to our coordinate space */
+    NSSize ourSize = [self angbandViewportSize];
+    
+    double dx = ourSize.width / baseSize.width;
+    double dy = ourSize.height / baseSize.height;
+    
+    rect.size.width *= dx;
+    rect.origin.x *= dx;
+    rect.size.height *= dy;
+    rect.origin.y *= dy;
+    
+    [self setNeedsDisplayAtNextRefreshInRect:rect];
+}
+
+- (oneway void)setNeedsDisplayAtNextRefresh {
     [self setNeedsDisplayAtNextRefreshInRect:(NSRect){NSZeroPoint, [self angbandViewportSize]}];
 }
 
-- (void)angbandImageRefreshed {
+- (oneway void)angbandImageRefreshed {
     size_t i = rectIndex;
     while (i--) {
         /* This isn't remotely right except for the active view */
@@ -159,13 +186,25 @@
 
 - (void)drawInRect:(NSRect)bounds {
     if (! bitmapContext) {
-        [[NSColor orangeColor] set];
+        [[NSColor blackColor] set];
         NSRectFill(bounds);
         return;
     };
     CGImageRef image = CGBitmapContextCreateImage(bitmapContext);
     CGContextDrawImage([[NSGraphicsContext currentContext] graphicsPort], NSRectToCGRect(bounds), image);
     CGImageRelease(image);
+}
+
+- (void)setPreferences:(NSDictionary *)preferences {
+    NSUserDefaults *defaults = [ScreenSaverDefaults defaultsForModuleWithName:@"com.ridiculousfish.AngbandScreenSaver"];
+    if (angbandContext) {
+        [angbandContext setPreferences:preferences];
+    } else {
+        for (NSString *key in preferences) {
+            [defaults setObject:[preferences objectForKey:key] forKey:key];
+        }
+    }
+    [defaults synchronize];
 }
 
 - (size_t)angbandSharedBufferSize {

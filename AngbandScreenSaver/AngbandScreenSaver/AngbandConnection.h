@@ -34,4 +34,6 @@
 
 - (void)drawInRect:(NSRect)rect;
 
+- (void)setPreferences:(NSDictionary *)preferences;
+
 @end

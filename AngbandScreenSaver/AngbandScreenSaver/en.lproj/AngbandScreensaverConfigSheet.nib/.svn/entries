@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2007-04-07T23:41:25.070420Z"
+   url="http://ridiculousfish.com/svn/Angband/trunk/Angband-3/nibs/AngbandScreensaverConfigSheet.nib"
+   last-author="pammon"
+   kind="dir"
+   repos="http://ridiculousfish.com/svn/Angband"
+   revision="2"/>
+<entry
+   committed-rev="3"
+   name="info.nib"
+   text-time="2007-04-23T07:52:12.000000Z"
+   committed-date="2007-04-23T18:20:12.123717Z"
+   checksum="c18f6207cf8aab727086832aa74a4e4d"
+   last-author="pammon"
+   kind="file"
+   revision="3"/>
+<entry
+   committed-rev="3"
+   name="keyedobjects.nib"
+   text-time="2007-04-23T07:52:12.000000Z"
+   committed-date="2007-04-23T18:20:12.123717Z"
+   checksum="1c7e262d4f7a58f8ebb8ff2a9c2ae7a7"
+   last-author="pammon"
+   kind="file"
+   prop-time="2007-04-07T23:39:33.000000Z"
+   revision="3"/>
+<entry
+   committed-rev="3"
+   name="classes.nib"
+   text-time="2007-04-23T07:52:12.000000Z"
+   committed-date="2007-04-23T18:20:12.123717Z"
+   checksum="94d555112ef01cb73d8d5a04256ba706"
+   last-author="pammon"
+   kind="file"
+   revision="3"/>
+</wc-entries>
