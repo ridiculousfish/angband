@@ -288,7 +288,7 @@ borg_verbose = FALSE
 # clevel <borg_munchkin_level>.  The advantage is a sizable boost to his early income and
 # he can find some wands early on to assist with monster killing.
 
-borg_munchkin_start = TRUE
+# borg_munchkin_start = TRUE
 borg_munchkin_level = 20
 borg_munchkin_depth = 15
 

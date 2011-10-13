@@ -31,12 +31,15 @@
 #include <dispatch/dispatch.h>
 #include <sys/mman.h>
 
+#include <ScreenSaver/ScreenSaver.h>
+#include <dlfcn.h>
+
 /* We can blit to a large layer or image and then scale it down during live resize, which makes resizing much faster, at the cost of some image quality during resizing */
 #ifndef USE_LIVE_RESIZE_CACHE
 # define USE_LIVE_RESIZE_CACHE 1
 #endif
 
-#define ALWAYS_BUFFER_WITH_BITMAP 1
+#define ALWAYS_BUFFER_WITH_BITMAP 0
 
 /*
  * Support the improved game command handling
@@ -55,7 +58,7 @@ extern char (*inkey_hack)(int flush_first);
 static char screensaver_inkey_hack_buffer[1024];
 static char screensaver_inkey_hack(int flush_first)
 {
-	static int screensaver_inkey_hack_index = 0;
+	static size_t screensaver_inkey_hack_index = 0;
     
 	if (screensaver_inkey_hack_index < sizeof(screensaver_inkey_hack_buffer))
 		return (screensaver_inkey_hack_buffer[screensaver_inkey_hack_index++]);
@@ -93,9 +96,9 @@ static void *remote_shmem_buffer;
 
 - (NSSize)angbandViewportSize;
 
-- (void)setNeedsDisplayAtNextRefresh;
-- (void)setNeedsDisplayAtNextRefreshInRect:(NSRect)rect;
-- (void)angbandImageRefreshed;
+- (oneway void)setNeedsDisplayAtNextRefresh;
+- (oneway void)setNeedsDisplayAtNextRefreshInBaseRect:(NSRect)rect withBaseSize:(NSSize)baseSize;
+- (oneway void)angbandImageRefreshed;
 
 @end
 
@@ -347,6 +350,7 @@ static BOOL check_events(int wait);
 static void cocoa_file_open_hook(const char *path, file_type ftype);
 static BOOL send_event(NSEvent *event);
 static void record_current_savefile(void);
+static void tell_borg_to_save(CFRunLoopTimerRef timer, void *info);
 
 /*
  * Available values for 'wait'
@@ -369,7 +373,18 @@ static bool initialized = FALSE;
 @implementation NSUserDefaults (AngbandDefaults)
 + (NSUserDefaults *)angbandDefaults
 {
-    return [NSUserDefaults standardUserDefaults];
+    if (running_as_remote)
+    {
+        static void *fw;
+        if (! fw) {
+            fw = dlopen("/System/Library/Frameworks/ScreenSaver.framework/ScreenSaver", RTLD_LAZY);
+        }
+        return [NSClassFromString(@"ScreenSaverDefaults") defaultsForModuleWithName:@"com.ridiculousfish.AngbandScreenSaver"];
+    }
+    else
+    {
+        return [NSUserDefaults standardUserDefaults];
+    }
 }
 @end
 
@@ -610,6 +625,9 @@ static int compare_advances(const void *ap, const void *bp)
 /* If we're trying to limit ourselves to a certain number of frames per second, then compute how long it's been since we last drew, and then wait until the next frame has passed. */
 - (void)throttle
 {
+    /* Don't throttle until we've started the game (no sense in making the loading screen take longer) */
+    if (!game_in_progress || !character_generated) return;
+    
     if (frames_per_second > 0)
     {
         CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
@@ -629,7 +647,7 @@ static int compare_advances(const void *ap, const void *bp)
 {
     /* Take this opportunity to throttle so we don't flush faster than desird. */
     BOOL viewInLiveResize = [view inLiveResize];
-    if (! viewInLiveResize) [self throttle];
+    //if (! viewInLiveResize) [self throttle];
     
     CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];    
     
@@ -981,7 +999,6 @@ static int compare_advances(const void *ap, const void *bp)
 
 - (void)angbandViewDidScale:(AngbandView *)view
 {
-    NSLog(@"angbandViewDidScale");
     if (! (inLiveResize && graf_mode != GRAF_MODE_NONE) && view == [self activeView])
     {
         [self updateImage];
@@ -1115,13 +1132,34 @@ static NSMenuItem *superitem(NSMenuItem *self)
 {
     for (id angbandView in angbandViews)
     {
-        [angbandView setNeedsDisplayAtNextRefreshInRect:[self convertBaseRect:rect toView:angbandView]];
+        [angbandView setNeedsDisplayAtNextRefreshInBaseRect:rect withBaseSize:[self baseSize]];
     }
 }
 
 - (void)displayIfNeeded
 {
     [(id)[self activeView] angbandImageRefreshed];
+}
+
+- (void)setPreferences:(NSDictionary *)preferences {
+    NSUserDefaults *defaults = [NSUserDefaults angbandDefaults];
+    for (NSString *key in preferences) {
+        [defaults setObject:[preferences objectForKey:key] forKey:key];
+    }
+    
+    graf_mode_req = [defaults integerForKey:@"GraphicsMode"];
+    allow_sounds = [defaults boolForKey:@"AllowSound"];
+    frames_per_second = [defaults integerForKey:@"FramesPerSecond"];    
+    
+    [defaults synchronize];
+}
+
+- (oneway void)clientIsShuttingDown {
+    tell_borg_to_save(NULL, NULL);
+    [AngbandContext endGame];
+    
+    // We just leave immediately
+    exit(0);
 }
 
 @end
@@ -1133,7 +1171,17 @@ static NSMenuItem *superitem(NSMenuItem *self)
     [self setNeedsDisplay:YES];
 }
 
-- (void)setNeedsDisplayAtNextRefreshInRect:(NSRect)rect {
+- (void)setNeedsDisplayAtNextRefreshInBaseRect:(NSRect)rect withBaseSize:(NSSize)baseSize {
+    NSSize ourSize = [self angbandViewportSize];
+    
+    double dx = ourSize.width / baseSize.width;
+    double dy = ourSize.height / baseSize.height;
+    
+    rect.size.width *= dx;
+    rect.origin.x *= dx;
+    rect.size.height *= dy;
+    rect.origin.y *= dy;
+    
     [self setNeedsDisplayInRect:rect];
 }
 
@@ -1607,12 +1655,19 @@ static errr Term_xtra_cocoa(int n, int v)
                 NSDate* date = [NSDate dateWithTimeIntervalSinceNow:seconds];
                 do
                 {
-                    NSEvent* event;
-                    do
+                    if (running_as_remote)
                     {
-                        event = [NSApp nextEventMatchingMask:-1 untilDate:date inMode:NSDefaultRunLoopMode dequeue:YES];
-                        if (event) send_event(event);
-                    } while (event);
+                        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:date];
+                    }
+                    else
+                    {
+                        NSEvent* event;
+                        do
+                        {
+                            event = [NSApp nextEventMatchingMask:-1 untilDate:date inMode:NSDefaultRunLoopMode dequeue:YES];
+                            if (event) send_event(event);
+                        } while (event);
+                    }
                 } while ([date timeIntervalSinceNow] >= 0);
                 
             }
@@ -1624,6 +1679,7 @@ static errr Term_xtra_cocoa(int n, int v)
         case TERM_XTRA_FRESH:
         {
             [angbandContext displayIfNeeded];
+            [angbandContext throttle];
             break;
         }
             
@@ -2207,7 +2263,7 @@ static void init_windows(void)
     term *primary = term_data_link(0);
     
     /* Prepare to create any additional windows, unless we're remote. */
-    if (! running_as_remote)
+    if (0) //doesn't work well in 3.2
     {
         int i;
         for (i=1; i < ANGBAND_TERM_MAX; i++) {
@@ -2307,8 +2363,8 @@ static void quit_calmly(void)
         do_cmd_save_game(FALSE, 0);
         record_current_savefile();
         
-        
         /* Quit */
+        NSLog(@"Quit");
         quit(NULL);
     }
     
@@ -2318,6 +2374,7 @@ static void quit_calmly(void)
 
 
 /* returns YES if we contain an AngbandView (and hence should direct our events to Angband) */
+__attribute__((unused))
 static BOOL contains_angband_view(NSView *view)
 {
     if ([view isKindOfClass:[AngbandView class]]) return YES;
@@ -2331,6 +2388,7 @@ static BOOL contains_angband_view(NSView *view)
 static BOOL send_event(NSEvent *event)
 {
 #if 1
+    // Screensaver
     [NSApp sendEvent:event];
     return NO;
 #else
@@ -2459,7 +2517,6 @@ static BOOL send_event(NSEvent *event)
  */
 static BOOL check_events(int wait)
 { 
-    
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
     /* Handles the quit_when_ready flag */
@@ -2479,13 +2536,22 @@ static BOOL check_events(int wait)
             return false;
         }
         else {
-            event = [NSApp nextEventMatchingMask:-1 untilDate:endDate inMode:NSDefaultRunLoopMode dequeue:YES];
-            if (! event)
+            if (running_as_remote)
             {
+                [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
                 [pool drain];
                 return FALSE;
             }
-            if (send_event(event)) break;
+            else
+            {
+                event = [NSApp nextEventMatchingMask:-1 untilDate:endDate inMode:NSDefaultRunLoopMode dequeue:YES];
+                if (! event)
+                {
+                    [pool drain];
+                    return FALSE;
+                }
+                if (send_event(event)) break;
+            }
         }
     }
     
@@ -2645,10 +2711,17 @@ static void initialize_file_paths(void)
 
 static void tell_borg_to_save(CFRunLoopTimerRef timer, void *info)
 {
-    NSLog(@"Saving to %s", savefile);
     if (savefile[0]) {
         do_cmd_save_game(FALSE, 0);
-        [[NSUserDefaults angbandDefaults] setValue:[[NSString stringWithUTF8String:savefile] lastPathComponent] forKey:@"BorgSaveFileName"];
+        
+        /* Record the save file in user defaults */
+        NSUserDefaults *defaults = [NSUserDefaults angbandDefaults];
+        NSString *key = @"BorgSaveFileName", *value = [[NSString stringWithUTF8String:savefile] lastPathComponent];
+        if (! [[defaults stringForKey:key] isEqualToString:value]) {
+            [defaults setValue:value forKey:key];
+            [defaults synchronize];
+            
+        }
     }
 }
 
@@ -2848,7 +2921,7 @@ static void tell_borg_to_save(CFRunLoopTimerRef timer, void *info)
 
 static void parent_died(void *unused)
 {
-    /* This is called on the global queue when the parent has died. Ideally we should exit cleanly. But we don't. */
+    /* This is called on the global queue when the parent has died. Ideally we should exit cleanly. But we don't, instead just bailing. */
     exit(0);
 }
 
@@ -2858,7 +2931,7 @@ static void start_screensaver(void)
 	bool file_exist;
     
 #ifdef ALLOW_BORG
-	int i, j;
+	int j;
 #endif /* ALLOW_BORG */
     
 	/* Set the name for process_player_name() */
@@ -2906,7 +2979,7 @@ static void start_screensaver(void)
 	 */
 	if (!file_exist)
 	{
-		int n = 0;//strlen(saverfilename);
+		//int n = strlen(saverfilename);
 		screensaver_inkey_hack_buffer[j++] = ' '; /* Return */
 		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
 	}
@@ -2994,19 +3067,24 @@ int main(int argc, char* argv[])
         @catch (NSException *exception)
         {
             
-            // Maybe the client died
-            NSString *name = [exception name];
-            if ([name isEqual:NSInvalidSendPortException] ||
-                [name isEqual:NSInvalidReceivePortException] ||
-                [name isEqual:NSPortSendException] ||
-                [name isEqual:NSPortReceiveException]) {
-                
+            NSArray *knownNames = [NSArray arrayWithObjects:
+                NSObjectInaccessibleException,
+                NSObjectNotAvailableException,
+                NSDestinationInvalidException,
+                NSPortTimeoutException,
+                NSInvalidSendPortException,
+                NSInvalidReceivePortException,
+                NSPortSendException,
+                NSPortReceiveException,
+                                   nil];
+            
+            if ([knownNames containsObject:[exception name]]) {
                 // The client died, so just exit
                 exit(0);
             }
             else
             {
-                // Other exception
+                // Some other exception, which we want to report
                 [exception raise];
             }
         }
