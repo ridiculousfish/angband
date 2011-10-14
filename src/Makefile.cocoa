@@ -20,7 +20,7 @@ ARCH = -arch i386 -arch x86_64
 WARNINGS = -W -Wall -Wno-unused-parameter -Wno-missing-field-initializers
 JUST_C = -Wdeclaration-after-statement -x c 
 OBJ_CFLAGS = -std=c99 -x objective-c -mmacosx-version-min=10.4
-CFLAGS = -g -I. $(WARNINGS) $(OPT) -DMACH_O_CARBON -DHAVE_MKSTEMP \
+CFLAGS = -g -I. -Iobject $(WARNINGS) $(OPT) -DMACH_O_CARBON -DHAVE_MKSTEMP \
 	-fno-stack-protector $(ARCH)
 LIBS = -framework Cocoa
 
@@ -85,6 +85,11 @@ main-cocoa.o : main-cocoa.m
 %.o : %.C
 	@printf "%10s %-20s\n" CC $<
 	$(CC) $(JUST_C) $(CFLAGS) -c -o $@ $<
+
+%.o : ../borg/%.C
+	@printf "%10s %-20s\n" CC $<
+	$(CC) $(JUST_C) $(CFLAGS) -c -o $@ $<
+
 
 
 
