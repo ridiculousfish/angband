@@ -1648,6 +1648,7 @@ static void process_some_user_pref_files(void)
  * code marks successful loading of the RNG state using the "Rand_quick"
  * flag, which is a hack, but which optimizes loading of savefiles.
  */
+extern bool borg_cheat_death;
 void play_game(void)
 {
 	bool existing_dead_save = FALSE;
@@ -1682,18 +1683,35 @@ void play_game(void)
 	if (savefile[0] && file_exists(savefile))
 	{
 		bool ok = old_load();
-		if (!ok) quit("broken savefile");
+        if (!ok)
+        {
+            if (borg_cheat_death)
+            {
+                /* Hack to make the Borg screensaver resilient against corrupt savefiles */
+                p_ptr->is_dead = TRUE;
+                existing_dead_save = TRUE;
+                p_ptr->ht_birth = TRUE;
+                savefile[0] = '\0';
+            }
+            else
+            {
+                quit("broken savefile");
 
-		if (p_ptr->is_dead && arg_wizard)
-		{
-			p_ptr->is_dead = FALSE;
-			p_ptr->noscore |= NOSCORE_WIZARD;
-		}
+            }
+        }
+        else
+        {
+            if (p_ptr->is_dead && arg_wizard)
+            {
+                p_ptr->is_dead = FALSE;
+                p_ptr->noscore |= NOSCORE_WIZARD;
+            }
 
-		else if (p_ptr->is_dead)
-		{
-			existing_dead_save = TRUE;
-		}
+            else if (p_ptr->is_dead)
+            {
+                existing_dead_save = TRUE;
+            }
+        }
 	}
 	else
 	{

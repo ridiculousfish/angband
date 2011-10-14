@@ -194,6 +194,9 @@
 /* Begin PBXProject section */
 		D0C5102C143F7120000A80E6 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = D0C5102F143F7120000A80E6 /* Build configuration list for PBXProject "AngbandScreenSaver" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;

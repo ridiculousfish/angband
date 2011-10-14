@@ -1,10 +1,12 @@
-//
-//  AngbandScreenSaverView.m
-//  AngbandScreenSaver
-//
-//  Created by Peter Ammon on 10/7/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
+/* File: AngbandScreenSaverView.m */
+
+/*
+ * Copyright (c) 2011 Peter Ammon
+ *
+ * This software may be copied and distributed for educational, research,
+ * and not for profit purposes provided that this copyright and statement
+ * are included in all such copies.
+ */
 
 #import "AngbandScreenSaverView.h"
 #import "AngbandConnection.h"
@@ -24,12 +26,14 @@
 }
 
 - (void)setConnected:(BOOL)flag {
-    if (connected && ! flag) {
-        [[AngbandConnection connection] removeView:self];
-    } else if (! connected && flag) {
-        [[AngbandConnection connection] addView:self];
+    if (connected != flag) {
+        connected = flag;
+        if (! connected) {
+            [[AngbandConnection connection] removeView:self];
+        } else {
+            [[AngbandConnection connection] addView:self];
+        }
     }
-    connected = flag;
 }
 
 - (void)startAnimation
@@ -144,6 +148,21 @@
 
 - (IBAction)modifyAnimationSpeed:sender {
     [self synchronizeAnimationSpeedDescriptionWithSlider];
+}
+
+- (IBAction)deleteSaveFile:sender {
+    NSInteger confirmed = NSRunAlertPanel(@"Reset Borg", @"This will move any borg save file to the trash, which will cause the borg to start a new character. Are you sure you want to do this?", @"Move Save to Trash", @"Cancel", NULL);
+    if (confirmed == NSAlertDefaultReturn) {
+        NSString *borgFileName = [[self userDefaults] stringForKey:@"BorgSaveFileName"];
+        if (! borgFileName) borgFileName = @"Player";
+
+        /* Big hack: hard code the path */
+        NSString *saveDirectory = [@"~/Documents/Angband/save/" stringByExpandingTildeInPath];
+        NSString *path = [saveDirectory stringByAppendingPathComponent:borgFileName];
+        NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
+        
+        [[NSWorkspace sharedWorkspace] recycleURLs:[NSArray arrayWithObject:url] completionHandler:NULL];
+    }
 }
 
 @end

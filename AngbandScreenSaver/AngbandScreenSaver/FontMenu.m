@@ -1,10 +1,12 @@
-//
-//  FontMenu.m
-//  AngbandScreenSaver
-//
-//  Created by Peter Ammon on 10/12/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
+/* File: FontMenu.m */
+
+/*
+ * Copyright (c) 2011 Peter Ammon
+ *
+ * This software may be copied and distributed for educational, research,
+ * and not for profit purposes provided that this copyright and statement
+ * are included in all such copies.
+ */
 
 #import "FontMenu.h"
 

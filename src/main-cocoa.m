@@ -2536,7 +2536,7 @@ static BOOL check_events(int wait)
             return false;
         }
         else {
-            if (running_as_remote)
+            if (running_as_remote || screensaver)
             {
                 [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
                 [pool drain];
@@ -2565,6 +2565,9 @@ static BOOL check_events(int wait)
 /* Update window visibility to match what's in p_ptr, so we show or hide terms that have or do not have contents respectively. */
 static void update_term_visibility(void)
 {
+    /* No need to do this as screensaver */
+    if (screensaver || running_as_remote) return;
+    
     if (! op_ptr) return; //paranoia
     
     /* Make a mask of window flags that matter */
@@ -2991,6 +2994,7 @@ static void start_screensaver(void)
 		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
 		screensaver_inkey_hack_buffer[j++] = ' '; /* Character info */
 	}
+
     
 	/*
 	 * Make sure the "verify_special" options is off, so that we can
