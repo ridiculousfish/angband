@@ -1,3 +1,7 @@
+Cocoa front-end including APWBorg, backported to 3.2.0 and hacked up into a screensaver. Once the 3.3.0 Borg is out we can do this properly.
+
+To build: open AngbandScreenSaver/AngbandScreenSaver.xcodeproj and build per usual.
+
 Angband 3.2.0
 =============
 
