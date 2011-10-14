@@ -1028,7 +1028,8 @@ static NSMenuItem *superitem(NSMenuItem *self)
 
 - (BOOL)isOrderedIn
 {
-    return [[[angbandViews lastObject] window] isVisible];
+    NSWindow *window = [[angbandViews lastObject] window];
+    return [window isVisible] || [window isMiniaturized] || [NSApp isHidden];
 }
 
 - (void)orderOut
