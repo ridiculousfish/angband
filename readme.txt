@@ -1,10 +1,4 @@
-Cocoa front-end back-ported to Angband 3.3.0 Release.
-
-To build:
-
-cd src; make -f Makefile.cocoa
-
-Angband 3.3.0
+Angband 3.3.2
 =============
 
 Angband is a graphical dungeon adventure game that uses textual characters

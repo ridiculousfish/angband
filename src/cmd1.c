@@ -25,6 +25,7 @@
 #include "generate.h"
 #include "history.h"
 #include "monster/mon-util.h"
+#include "monster/mon-timed.h"
 #include "object/inventory.h"
 #include "object/tvalsval.h"
 #include "object/object.h"
@@ -471,6 +472,9 @@ byte py_pickup(int pickup)
 	/* Objects picked up.  Used to determine time cost of command. */
 	byte objs_picked_up = 0;
 
+	/* Always pickup gold, effortlessly */
+	py_pickup_gold();
+
 	/* Nothing else to pick up -- return */
 	if (!cave->o_idx[py][px]) return objs_picked_up;
 
@@ -556,7 +560,7 @@ void move_player(int dir, bool disarm)
 
 	int y = py + ddy[dir];
 	int x = px + ddx[dir];
-	
+
 	int m_idx = cave->m_idx[y][x];
 
 	/* Attack monsters */
@@ -566,7 +570,7 @@ void move_player(int dir, bool disarm)
 			become_aware(m_idx);
 
 			/* Mimic wakes up */
-			mon_clear_timed(m_idx, MON_TMD_SLEEP, MON_TMD_FLG_NOMESSAGE);
+			mon_clear_timed(m_idx, MON_TMD_SLEEP, MON_TMD_FLG_NOMESSAGE, FALSE);
 
 		} else {
 			py_attack(y, x);
